@@ -78,13 +78,13 @@ const ApprovedUsersTable = () => {
 
   const filteredUsers = searchInput
     ? users.filter((u) => {
-        const query = normalized(searchInput);
-        return (
-          normalized(u.fullName).includes(query) ||
-          normalized(u.idNumber).includes(query) ||
-          normalized(u.organisation).includes(query)
-        );
-      })
+      const query = normalized(searchInput);
+      return (
+        normalized(u.fullName).includes(query) ||
+        normalized(u.idNumber).includes(query) ||
+        normalized(u.organisation).includes(query)
+      );
+    })
     : users;
 
   useEffect(() => { fetchApproved(); }, []);
@@ -221,80 +221,133 @@ const ApprovedUsersTable = () => {
                   </Button>
                 </div>
               </TableCell>
-                  {/* Edit Validity Dialog */}
-                  <Dialog open={!!editUserId} onOpenChange={() => setEditUserId(null)}>
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Edit Validity & Comment</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium">Valid From</label>
-                        <Input type="datetime-local" value={editValidFrom?.slice(0, 16)} onChange={e => setEditValidFrom(e.target.value)} />
-                        <label className="block text-sm font-medium">Valid Until</label>
-                        <Input type="datetime-local" value={editValidUntil?.slice(0, 16)} onChange={e => setEditValidUntil(e.target.value)} />
-                        <label className="block text-sm font-medium">Comment</label>
-                        <Input type="text" value={editComment} onChange={e => setEditComment(e.target.value)} placeholder="Reason for change (user will see this)" />
-                        <div className="flex gap-2 justify-end mt-4">
-                          <Button variant="outline" onClick={() => setEditUserId(null)}>Cancel</Button>
-                          <Button
-                            // loading={actionLoading}
-                            onClick={async () => {
-                              setActionLoading(true);
-                              try {
-                                await API.patch(`/api/admin/update-validity/${editUserId}`, {
-                                  validFrom: editValidFrom,
-                                  validUntil: editValidUntil,
-                                  comment: editComment,
-                                });
-                                toast.success("Validity updated");
-                                setEditUserId(null);
-                                fetchApproved();
-                              } catch (err: any) {
-                                toast.error(err.response?.data?.message || "Failed to update validity");
-                              } finally {
-                                setActionLoading(false);
-                              }
-                            }}
-                          >Save</Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+              {/* Edit Validity Dialog */}
+              <Dialog open={!!editUserId} onOpenChange={() => setEditUserId(null)}>
+                <DialogContent className="max-w-md bg-white border border-slate-200 shadow-xl rounded-2xl">
+                  <DialogHeader className="border-b border-slate-100 pb-4 mb-2">
+                    <DialogTitle className="text-xl font-bold text-slate-800">Edit Validity & Comment</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-slate-700">Valid From</label>
+                      <Input
+                        type="datetime-local"
+                        className="bg-slate-50 border-slate-200 text-slate-800 focus:ring-primary/20"
+                        value={editValidFrom?.slice(0, 16)}
+                        onChange={e => setEditValidFrom(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-slate-700">Valid Until</label>
+                      <Input
+                        type="datetime-local"
+                        className="bg-slate-50 border-slate-200 text-slate-800 focus:ring-primary/20"
+                        value={editValidUntil?.slice(0, 16)}
+                        onChange={e => setEditValidUntil(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-slate-700">Comment</label>
+                      <Input
+                        type="text"
+                        className="bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-primary/20"
+                        value={editComment}
+                        onChange={e => setEditComment(e.target.value)}
+                        placeholder="Reason for change (user will see this)"
+                      />
+                    </div>
+                    <div className="flex gap-2 justify-end mt-6 pt-2 border-t border-slate-100">
+                      <Button variant="outline" className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50" onClick={() => setEditUserId(null)}>Cancel</Button>
+                      <Button
+                        className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+                        disabled={actionLoading}
+                        onClick={async () => {
+                          setActionLoading(true);
+                          try {
+                            await API.patch(`/api/admin/update-validity/${editUserId}`, {
+                              validFrom: editValidFrom,
+                              validUntil: editValidUntil,
+                              comment: editComment,
+                            });
+                            toast.success("Validity updated");
+                            setEditUserId(null);
+                            fetchApproved();
+                          } catch (err: any) {
+                            toast.error(err.response?.data?.message || "Failed to update validity");
+                          } finally {
+                            setActionLoading(false);
+                          }
+                        }}
+                      >
+                        {actionLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                        Save Changes
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
-                  {/* Reject User Dialog */}
-                  <Dialog open={!!rejectUserId} onOpenChange={() => setRejectUserId(null)}>
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Reject User</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium">Rejection Reason</label>
-                        <Input type="text" value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Reason for rejection (user will see this)" />
-                        <div className="flex gap-2 justify-end mt-4">
-                          <Button variant="outline" onClick={() => setRejectUserId(null)}>Cancel</Button>
-                          <Button
-                            // loading={actionLoading}
-                            variant="destructive"
-                            onClick={async () => {
-                              setActionLoading(true);
-                              try {
-                                await API.post(`/api/admin/reject/${rejectUserId}`, {
-                                  rejectionReason: rejectReason,
-                                });
-                                toast.success("User rejected");
-                                setRejectUserId(null);
-                                fetchApproved();
-                              } catch (err: any) {
-                                toast.error(err.response?.data?.message || "Failed to reject user");
-                              } finally {
-                                setActionLoading(false);
-                              }
-                            }}
-                          >Reject</Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+              {/* Reject User Dialog */}
+              <Dialog open={!!rejectUserId} onOpenChange={() => setRejectUserId(null)}>
+                <DialogContent className="max-w-md bg-white/95 backdrop-blur-xl border border-rose-100 shadow-2xl rounded-2xl overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-400 to-rose-600" />
+                  <DialogHeader className="border-b border-rose-50/50 pb-4 mb-2">
+                    <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                      <span className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shadow-inner">
+                        <span className="w-3 h-3 rounded-full bg-rose-500" />
+                      </span>
+                      Reject User Access
+                    </DialogTitle>
+                    <p className="text-slate-500 pt-2 text-sm leading-relaxed">
+                      Please provide a clear reason for revoking access.
+                    </p>
+                  </DialogHeader>
+                  <div className="space-y-5 py-2">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-slate-700">
+                        Rejection Reason <span className="text-rose-500">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        className="bg-rose-50/30 border-rose-100 text-slate-800 placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:ring-rose-400/20 transition-all rounded-xl"
+                        value={rejectReason}
+                        onChange={e => setRejectReason(e.target.value)}
+                        placeholder="E.g., Policy violation, expired contract..."
+                      />
+                      <p className="text-[11px] font-medium text-slate-400 flex items-center gap-1.5 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                        This note will be securely recorded.
+                      </p>
+                    </div>
+                    <div className="flex gap-2 justify-end mt-4 pt-4 border-t border-slate-100/60 sm:space-x-2">
+                      <Button variant="outline" className="bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors w-full sm:w-auto rounded-xl" onClick={() => setRejectUserId(null)}>Cancel</Button>
+                      <Button
+                        variant="destructive"
+                        className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-md shadow-rose-200 transition-all w-full sm:w-auto rounded-xl"
+                        disabled={actionLoading}
+                        onClick={async () => {
+                          setActionLoading(true);
+                          try {
+                            await API.post(`/api/admin/reject/${rejectUserId}`, {
+                              rejectionReason: rejectReason,
+                            });
+                            toast.success("User rejected");
+                            setRejectUserId(null);
+                            fetchApproved();
+                          } catch (err: any) {
+                            toast.error(err.response?.data?.message || "Failed to reject user");
+                          } finally {
+                            setActionLoading(false);
+                          }
+                        }}
+                      >
+                        {actionLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                        Confirm Rejection
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </TableRow>
           ))}
         </TableBody>
