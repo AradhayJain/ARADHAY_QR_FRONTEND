@@ -83,13 +83,13 @@ const PendingRequestsTable = () => {
 
   const filteredRequests = searchInput
     ? requests.filter((request) => {
-        const query = normalized(searchInput);
-        return (
-          normalized(request.fullName).includes(query) ||
-          normalized(request.idNumber).includes(query) ||
-          normalized(request.organisation).includes(query)
-        );
-      })
+      const query = normalized(searchInput);
+      return (
+        normalized(request.fullName).includes(query) ||
+        normalized(request.idNumber).includes(query) ||
+        normalized(request.organisation).includes(query)
+      );
+    })
     : requests;
 
   /**
@@ -269,37 +269,54 @@ const PendingRequestsTable = () => {
 
       {/* ✅ Reject Modal */}
       <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject Access Request</DialogTitle>
-            <DialogDescription>
-              Please provide a reason for rejecting{" "}
-              <b>{selectedRequest?.fullName}</b>'s request.
+        <DialogContent className="max-w-md bg-white/95 backdrop-blur-xl border border-rose-100 shadow-2xl rounded-2xl overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-400 to-rose-600" />
+          <DialogHeader className="border-b border-rose-50/50 pb-4 mb-2">
+            <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+              <span className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shadow-inner">
+                <XCircle className="w-5 h-5 text-rose-600 mb-0.5" />
+              </span>
+              Reject Access Request
+            </DialogTitle>
+            <DialogDescription className="text-slate-500 pt-2 text-sm leading-relaxed">
+              Please provide a clear reason for rejecting{" "}
+              <b className="text-slate-700 font-semibold">{selectedRequest?.fullName}</b>'s access request.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="space-y-5 py-2">
             <div className="space-y-2">
-              <Label htmlFor="reason">Rejection Reason</Label>
+              <Label htmlFor="reason" className="text-sm font-semibold text-slate-700">
+                Rejection Reason <span className="text-rose-500">*</span>
+              </Label>
               <Textarea
                 id="reason"
-                placeholder="Write a clear reason for rejection..."
+                placeholder="E.g., Invalid ID, missing documentation..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                rows={5}
-                className="min-h-[120px] resize-none bg-muted/30 border-muted-foreground/20 focus-visible:border-primary focus-visible:ring-primary"
+                rows={4}
+                className="min-h-[100px] resize-none bg-rose-50/30 border-rose-100 text-slate-800 placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:ring-rose-400/20 transition-all rounded-xl"
               />
-              <p className="text-xs text-muted-foreground">
-                This note will be shared with the requester.
+              <p className="text-[11px] font-medium text-slate-400 flex items-center gap-1.5 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                This note will be securely shared with the requester.
               </p>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectModalOpen(false)}>
+          <DialogFooter className="mt-4 pt-4 border-t border-slate-100/60 sm:space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setRejectModalOpen(false)}
+              className="bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors w-full sm:w-auto rounded-xl"
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleReject}>
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-md shadow-rose-200 transition-all w-full sm:w-auto rounded-xl"
+            >
               Confirm Rejection
             </Button>
           </DialogFooter>
