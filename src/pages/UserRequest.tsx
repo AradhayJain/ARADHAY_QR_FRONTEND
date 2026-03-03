@@ -31,8 +31,8 @@ const UserRequest = () => {
   const [locationError, setLocationError] = useState<string | null>("Detecting location...");
 
   // ✅ Geofencing Logic
-  const MACHINE_LAT = parseFloat(import.meta.env.VITE_MACHINE_LATITUDE || "28.7090296");
-  const MACHINE_LNG = parseFloat(import.meta.env.VITE_MACHINE_LONGITUDE || "77.1439471");
+  const MACHINE_LAT = parseFloat(import.meta.env.VITE_MACHINE_LATITUDE || "28.749685");
+  const MACHINE_LNG = parseFloat(import.meta.env.VITE_MACHINE_LONGITUDE || "77.113849");
   const MAX_DISTANCE_KM = 1;
 
   const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -54,26 +54,49 @@ const UserRequest = () => {
     }
 
     const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const dist = getDistance(
-          position.coords.latitude,
-          position.coords.longitude,
-          MACHINE_LAT,
-          MACHINE_LNG
-        );
-        setIsNearMachine(dist <= MAX_DISTANCE_KM);
-        setLocationError(dist <= MAX_DISTANCE_KM ? null : `You are ${dist.toFixed(2)}km away.`);
-      },
-      (error) => {
-        setIsNearMachine(false);
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationError("Location permission denied. Please enable it in your browser settings to request access.");
-        } else {
-          setLocationError("Unable to retrieve your location.");
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  (position) => {
+    const { latitude, longitude, accuracy } = position.coords;
+
+    console.log("Coords:", latitude, longitude, "Accuracy:", accuracy);
+
+    // ❗ Ignore inaccurate locations
+    if (accuracy > 200) {
+      setLocationError("Waiting for accurate GPS location...");
+      return;
+    }
+
+    const dist = getDistance(
+      latitude,
+      longitude,
+      MACHINE_LAT,
+      MACHINE_LNG
     );
+
+    setIsNearMachine(dist <= MAX_DISTANCE_KM);
+
+    setLocationError(
+      dist <= MAX_DISTANCE_KM
+        ? null
+        : `You are ${dist.toFixed(2)}km away.`
+    );
+  },
+  (error) => {
+    setIsNearMachine(false);
+
+    if (error.code === error.PERMISSION_DENIED) {
+      setLocationError(
+        "Location permission denied. Enable it in browser settings."
+      );
+    } else {
+      setLocationError("Unable to retrieve your location.");
+    }
+  },
+  {
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 0
+  }
+);
 
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
