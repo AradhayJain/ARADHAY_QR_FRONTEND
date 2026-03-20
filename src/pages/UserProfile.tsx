@@ -7,9 +7,8 @@ import { ArrowLeft, Clock, Calendar, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import API from "@/api/api";
 
-import AdminActivityViewer from "@/components/AdminActivityViewer";
-import GithubActivityCalendar from "@/components/GithubActivityCalendar";
-import { useUserActivity } from "@/hooks/useUserActivity";
+import ContributionCalendar from "@/components/ContributionCalendar";
+import { useUserFullActivity } from "@/hooks/useUserFullActivity";
 
 const UserProfile = () => {
   const { id } = useParams();
@@ -169,13 +168,12 @@ const UserProfile = () => {
           </Card>
         </div>
 
-        {/* Full-Year Activity Calendar (Admin View) */}
+        {/* Activity Calendar (Admin View) */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Activity Calendar (Full Year)</CardTitle>
+            <CardTitle>Activity Calendar (90 Days)</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Use the useUserActivity hook to fetch activity for this user and year */}
             <AdminUserActivity userId={profile.user._id} />
           </CardContent>
         </Card>
@@ -214,13 +212,12 @@ const UserProfile = () => {
 };
 
 
-// Inline component to fetch and render the calendar for the given userId
+// Component to fetch and render ContributionCalendar for admin view
 function AdminUserActivity({ userId }: { userId: string }) {
-  const year = new Date().getFullYear();
-  const { data, isLoading, error } = useUserActivity(userId, year);
-  if (isLoading) return <div>Loading activity...</div>;
-  if (error) return <div>Error: {error}</div>;
-  return <GithubActivityCalendar data={data} year={year} />;
+  const { data, isLoading, error } = useUserFullActivity(userId);
+  if (isLoading) return <div className="text-muted-foreground">Loading activity...</div>;
+  if (error) return <div className="text-destructive">Error: {error}</div>;
+  return <ContributionCalendar activities={data} />;
 }
 
 export default UserProfile;

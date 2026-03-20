@@ -70,12 +70,12 @@ const HeroSection = () => {
                 </Button>
               </Link>
             )}
-            <Link to="/admin/login">
+            {/* <Link to="/admin/login">
               <Button variant="outline" size="lg" className="px-8 py-6 text-base group">
                 Admin Dashboard
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
-            </Link>
+            </Link> */}
           </motion.div>
 
 

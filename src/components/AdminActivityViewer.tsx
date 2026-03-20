@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useUserActivity } from "@/hooks/useUserActivity";
-import GithubActivityCalendar from "@/components/GithubActivityCalendar";
+import { useUserFullActivity } from "@/hooks/useUserFullActivity";
+import ContributionCalendar from "@/components/ContributionCalendar";
 
 interface UserOption {
   id: string;
@@ -15,8 +15,7 @@ const USERS: UserOption[] = [
 
 const AdminActivityViewer: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<string>("");
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const { data, isLoading, error } = useUserActivity(selectedUser, year);
+  const { data, isLoading, error } = useUserFullActivity(selectedUser);
 
   return (
     <div>
@@ -27,21 +26,15 @@ const AdminActivityViewer: React.FC = () => {
             <option key={u.id} value={u.id}>{u.name}</option>
           ))}
         </select>
-        <input
-          type="number"
-          min="2000"
-          max={new Date().getFullYear()}
-          value={year}
-          onChange={e => setYear(Number(e.target.value))}
-        />
       </div>
+
       {selectedUser ? (
         isLoading ? (
           <div>Loading activity...</div>
         ) : error ? (
           <div>Error: {error}</div>
         ) : (
-          <GithubActivityCalendar data={data} year={year} />
+          <ContributionCalendar activities={data} />
         )
       ) : (
         <div>Select a user to view activity.</div>

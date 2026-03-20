@@ -136,6 +136,7 @@ const AttendanceTable = () => {
       <Table>
         <TableHeader className="bg-slate-50">
           <TableRow>
+            <TableHead className="w-12 font-bold">#</TableHead>
             <TableHead className="font-bold">Member</TableHead>
             <TableHead className="font-bold text-center"><div className="flex items-center justify-center gap-1"><LogIn className="w-3 h-3"/> First IN</div></TableHead>
             <TableHead className="font-bold text-center"><div className="flex items-center justify-center gap-1"><LogOut className="w-3 h-3"/> Last OUT</div></TableHead>
@@ -144,7 +145,7 @@ const AttendanceTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredData.map((a) => (
+{filteredData.map((a, index) => (
             <TableRow 
               key={a.requestId} 
               className={`transition-all group ${
@@ -153,6 +154,7 @@ const AttendanceTable = () => {
                   : 'hover:bg-blue-50/30'
               }`}
             >
+              <TableCell className="w-12 font-mono text-sm font-bold text-slate-700">{index + 1}</TableCell>
               <TableCell>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">

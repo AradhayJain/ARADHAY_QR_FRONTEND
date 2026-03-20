@@ -208,6 +208,7 @@ const PendingRequestsTable = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12 text-center font-bold">#</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>College ID</TableHead>
                   <TableHead>Organisation</TableHead>
@@ -217,8 +218,9 @@ const PendingRequestsTable = () => {
               </TableHeader>
 
               <TableBody>
-                {filteredRequests.map((request) => (
+{filteredRequests.map((request, index) => (
                   <TableRow key={request._id}>
+                    <TableCell className="w-12 text-center font-mono text-sm font-bold text-slate-700">{index + 1}</TableCell>
                     <TableCell className="font-medium">
                       {request.fullName}
                     </TableCell>

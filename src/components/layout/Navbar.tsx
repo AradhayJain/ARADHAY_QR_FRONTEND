@@ -27,9 +27,10 @@ const Navbar = () => {
 
   // ✅ Nav Links based on login
   const navLinks = [
+    { name: "Home", href: "/" },
     { name: "Features", href: "/features" },
     { name: "How it Works", href: "/how-it-works" },
-    { name: "Admin", href: "/admin/login" },
+    // { name: "Admin", href: "/admin/login" },
     ...(user ? [
       { name: "My QR", href: "/user/viewqr" }
     ] : []),

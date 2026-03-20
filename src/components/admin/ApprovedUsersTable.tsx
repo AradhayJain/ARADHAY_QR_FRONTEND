@@ -149,6 +149,7 @@ const ApprovedUsersTable = () => {
       <Table>
         <TableHeader className="bg-slate-50/50">
           <TableRow>
+            <TableHead className="w-12 text-right font-bold">#</TableHead>
             <TableHead className="font-bold">User Identity</TableHead>
             <TableHead className="font-bold">Organisation</TableHead>
             <TableHead className="font-bold">Current Status</TableHead>
@@ -157,8 +158,9 @@ const ApprovedUsersTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredUsers.map((u) => (
+{filteredUsers.map((u, index) => (
             <TableRow key={u._id} className="group hover:bg-slate-50/80 transition-all">
+              <TableCell className="w-12 text-right font-mono text-sm font-bold text-slate-700">{index + 1}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-xs uppercase">

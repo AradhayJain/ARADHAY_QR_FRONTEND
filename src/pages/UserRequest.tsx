@@ -1,12 +1,12 @@
 import React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Loader2, CheckCircle2, Clock, MapPin } from "lucide-react";
+import { Loader2, CheckCircle2, Clock } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/layout/Navbar";
 import API from "@/api/api";
@@ -26,79 +26,32 @@ const UserRequest = () => {
     validUntil: "",
   });
 
-  // Geofencing States
-  const [isNearMachine, setIsNearMachine] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>("Detecting location...");
+  const [lockedFields, setLockedFields] = useState({
+    fullName: false,
+    collegeId: false,
+    organisation: false,
+  });
 
-  // ✅ Geofencing Logic
-  const MACHINE_LAT = parseFloat(import.meta.env.VITE_MACHINE_LATITUDE || "28.749685");
-  const MACHINE_LNG = parseFloat(import.meta.env.VITE_MACHINE_LONGITUDE || "77.113849");
-  const MAX_DISTANCE_KM = 1;
-
-  const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371; // Radius of earth in km
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
-  React.useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser");
-      return;
+  useEffect(() => {
+    const storedUser = localStorage.getItem("focusdesk_user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setFormData((prev) => ({
+          ...prev,
+          fullName: parsedUser.fullName || prev.fullName,
+          collegeId: parsedUser.rollNo || prev.collegeId,
+          organisation: parsedUser.organisation || prev.organisation,
+        }));
+        setLockedFields({
+          fullName: !!parsedUser.fullName,
+          collegeId: !!parsedUser.rollNo,
+          organisation: !!parsedUser.organisation,
+        });
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage", error);
+      }
     }
-
-    const watchId = navigator.geolocation.watchPosition(
-  (position) => {
-    const { latitude, longitude, accuracy } = position.coords;
-
-    console.log("Coords:", latitude, longitude, "Accuracy:", accuracy);
-
-    // ❗ Ignore inaccurate locations
-    if (accuracy > 200) {
-      setLocationError("Waiting for accurate GPS location...");
-      return;
-    }
-
-    const dist = getDistance(
-      latitude,
-      longitude,
-      MACHINE_LAT,
-      MACHINE_LNG
-    );
-
-    setIsNearMachine(dist <= MAX_DISTANCE_KM);
-
-    setLocationError(
-      dist <= MAX_DISTANCE_KM
-        ? null
-        : `You are ${dist.toFixed(2)}km away.`
-    );
-  },
-  (error) => {
-    setIsNearMachine(false);
-
-    if (error.code === error.PERMISSION_DENIED) {
-      setLocationError(
-        "Location permission denied. Enable it in browser settings."
-      );
-    } else {
-      setLocationError("Unable to retrieve your location.");
-    }
-  },
-  {
-    enableHighAccuracy: true,
-    timeout: 15000,
-    maximumAge: 0
-  }
-);
-
-    return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,12 +85,6 @@ const UserRequest = () => {
     // ✅ Validity check
     if (validFromDate >= validUntilDate) {
       toast.error("Valid Until must be after Valid From");
-      return;
-    }
-
-    // ✅ Geofence check
-    if (!isNearMachine) {
-      toast.error(locationError || "You must be near the gate to submit a request.");
       return;
     }
 
@@ -198,19 +145,6 @@ const UserRequest = () => {
                   </p>
                 </div>
 
-                {/* Geofence Notice */}
-                {!isNearMachine && (
-                  <div className="bg-destructive/10 border border-destructive rounded-xl p-4 mb-6 text-center">
-                    <MapPin className="w-6 h-6 mx-auto text-destructive mb-2" />
-                    <p className="text-sm font-semibold text-destructive mb-1">
-                      {locationError?.includes("denied") ? "Location Required" : "Too far from gate"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {locationError || "You must be within 1km of the machine to request a QR pass."}
-                    </p>
-                  </div>
-                )}
-
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Full Name */}
                   <div className="space-y-2">
@@ -221,7 +155,8 @@ const UserRequest = () => {
                       type="text"
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="h-12"
+                      readOnly={lockedFields.fullName}
+                      className={`h-12 ${lockedFields.fullName ? "opacity-70 cursor-not-allowed bg-muted" : ""}`}
                     />
                   </div>
 
@@ -235,7 +170,8 @@ const UserRequest = () => {
                       placeholder="24CSE250"
                       value={formData.collegeId}
                       onChange={handleChange}
-                      className="h-12"
+                      readOnly={lockedFields.collegeId}
+                      className={`h-12 ${lockedFields.collegeId ? "opacity-70 cursor-not-allowed bg-muted" : ""}`}
                     />
                   </div>
 
@@ -248,7 +184,8 @@ const UserRequest = () => {
                       type="text"
                       value={formData.organisation}
                       onChange={handleChange}
-                      className="h-12"
+                      readOnly={lockedFields.organisation}
+                      className={`h-12 ${lockedFields.organisation ? "opacity-70 cursor-not-allowed bg-muted" : ""}`}
                     />
                   </div>
 
@@ -281,7 +218,7 @@ const UserRequest = () => {
                   {/* Submit */}
                   <Button
                     type="submit"
-                    disabled={isLoading || !isNearMachine}
+                    disabled={isLoading}
                     className="w-full h-12 btn-gradient"
                   >
                     {isLoading ? (
