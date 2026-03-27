@@ -55,7 +55,7 @@ const AdminDashboard = () => {
       <main className="lg:pl-64">
         <div className="p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8 pt-12 lg:pt-0">
+          <div className="mb-8 pt-20 lg:pt-0">
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
               Admin Dashboard
             </h1>
