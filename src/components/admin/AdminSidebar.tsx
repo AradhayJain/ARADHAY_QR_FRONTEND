@@ -44,15 +44,15 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
   return (
     <>
       {/* Mobile Top Navbar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4 shadow-sm">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b border-border z-40 flex items-center justify-between px-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-xs">FD</span>
           </div>
-          <span className="font-bold text-sidebar-foreground">FocusDesk Admin</span>
+          <span className="font-bold text-foreground">FocusDesk Admin</span>
         </div>
         <button
-          className="p-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors"
+          className="p-2 text-foreground hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -70,21 +70,21 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-sidebar text-sidebar-foreground z-50 transition-transform duration-300",
+          "fixed top-0 left-0 h-full w-64 bg-card text-card-foreground border-r border-border z-50 transition-transform duration-300",
           "lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-sidebar-border">
+          <div className="p-6 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center">
-                <span className="text-sidebar-primary-foreground font-bold">FD</span>
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-bold">FD</span>
               </div>
               <div>
-                <p className="font-semibold text-sidebar-foreground">FocusDesk</p>
-                <p className="text-xs text-sidebar-foreground/60">Admin Panel</p>
+                <p className="font-semibold text-foreground">FocusDesk</p>
+                <p className="text-xs text-muted-foreground">Admin Panel</p>
               </div>
             </div>
           </div>
@@ -102,8 +102,8 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
                     isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <item.icon className="w-5 h-5" />
@@ -119,10 +119,10 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-sidebar-border">
+          <div className="p-4 border-t border-border">
             <button
               onClick={onLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
             >
               <LogOut className="w-5 h-5" />
               Logout
