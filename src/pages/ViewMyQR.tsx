@@ -56,7 +56,8 @@ const ViewMyQR = () => {
         navigate(`/user/dashboard?id=${rollNo}`);
       } catch (err: any) {
         // If 404 or any other error, assume no QR found
-        toast.info("No QR found. Please generate a new request.");
+        console.error("ViewMyQR fetch error details:", err.response?.data || err.message);
+        toast.info(err.response?.data?.message || "No QR found. Please generate a new request.");
         navigate("/user/request");
       }
     };

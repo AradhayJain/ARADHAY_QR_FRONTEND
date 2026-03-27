@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { motion } from "framer-motion";
@@ -18,7 +17,6 @@ import QRCode from "react-qr-code";
 const UserDashboard = () => {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState("in");
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
   const [error, setError] = useState(false);
@@ -27,9 +25,9 @@ const UserDashboard = () => {
   const [calendar, setCalendar] = useState<any[]>([]);
   const [qrRevealed, setQrRevealed] = useState(false);
 
-  // Geofencing States
-  const [isNearMachine, setIsNearMachine] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>("Detecting location...");
+  // Geofencing States (Temporarily disabled - defaults to true)
+  const [isNearMachine, setIsNearMachine] = useState(true); 
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   // ✅ Read ID Number
   const [params] = useSearchParams();
@@ -42,7 +40,7 @@ const UserDashboard = () => {
   const MAX_DISTANCE_KM = 1;
 
   const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    
+
     console.log(lat1, lon1, lat2, lon2)
     const R = 6371; // Radius of earth in km
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -56,57 +54,59 @@ const UserDashboard = () => {
   };
 
   useEffect(() => {
+    /* ⚠️ TEMPORARILY COMMENTED OUT GEOFENCING 
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser");
       return;
     }
 
-   const watchId = navigator.geolocation.watchPosition(
-  (position) => {
-    const { latitude, longitude, accuracy } = position.coords;
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
 
-    console.log("Coords:", latitude, longitude, "Accuracy:", accuracy);
+        console.log("Coords:", latitude, longitude, "Accuracy:", accuracy);
 
-    // ❗ Ignore inaccurate locations
-    if (accuracy > 200) {
-      setLocationError("Waiting for accurate GPS location...");
-      return;
-    }
+        // ❗ Ignore inaccurate locations
+        if (accuracy > 200) {
+          setLocationError("Waiting for accurate GPS location...");
+          return;
+        }
 
-    const dist = getDistance(
-      latitude,
-      longitude,
-      MACHINE_LAT,
-      MACHINE_LNG
+        const dist = getDistance(
+          latitude,
+          longitude,
+          MACHINE_LAT,
+          MACHINE_LNG
+        );
+
+        setIsNearMachine(dist <= MAX_DISTANCE_KM);
+
+        setLocationError(
+          dist <= MAX_DISTANCE_KM
+            ? null
+            : `You are ${dist.toFixed(2)}km away.`
+        );
+      },
+      (error) => {
+        setIsNearMachine(false);
+
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError(
+            "Location permission denied. Enable it in browser settings."
+          );
+        } else {
+          setLocationError("Unable to retrieve your location.");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      }
     );
-
-    setIsNearMachine(dist <= MAX_DISTANCE_KM);
-
-    setLocationError(
-      dist <= MAX_DISTANCE_KM
-        ? null
-        : `You are ${dist.toFixed(2)}km away.`
-    );
-  },
-  (error) => {
-    setIsNearMachine(false);
-
-    if (error.code === error.PERMISSION_DENIED) {
-      setLocationError(
-        "Location permission denied. Enable it in browser settings."
-      );
-    } else {
-      setLocationError("Unable to retrieve your location.");
-    }
-  },
-  {
-    enableHighAccuracy: true,
-    timeout: 15000,
-    maximumAge: 0
-  }
-);
 
     return () => navigator.geolocation.clearWatch(watchId);
+    */
   }, []);
 
   /**
@@ -167,10 +167,7 @@ const UserDashboard = () => {
         const response = await API.get(`/api/user/active-qr/${idNumber}`);
         setActiveQRData(response.data);
 
-        // Auto-switch tab to active QR
-        if (response.data.activeQRType) {
-          setActiveTab(response.data.activeQRType.toLowerCase());
-        }
+        // No need to set active tab anymore, UI auto-updates based on activeQRType
       } catch (err) {
         console.error("Active QR fetch error:", err);
       }
@@ -409,82 +406,42 @@ const UserDashboard = () => {
                 </div>
               ) : (
                 <>
-                  {/* Tabs */}
-                  <Tabs
-                    value={activeTab}
-                    onValueChange={setActiveTab}
-                    className="w-full"
-                  >
-                    <TabsList className="grid grid-cols-2 h-12 mb-6">
-                      <TabsTrigger value="in" disabled={activeQRData?.activeQRType !== "IN"}>
-                        <ArrowRight className="w-4 h-4 mr-1" />
-                        IN QR
-                      </TabsTrigger>
-
-                      <TabsTrigger value="out" disabled={activeQRData?.activeQRType !== "OUT"}>
-                        <ArrowLeft className="w-4 h-4 mr-1" />
-                        OUT QR
-                      </TabsTrigger>
-                    </TabsList>
-
-                    {/* ✅ IN QR */}
-                    <TabsContent value="in">
-                      {activeQRData?.activeQRType === "IN" && activeQRData?.qrToken ? (
-                        <div
-                          className="relative bg-white rounded-2xl p-8 flex justify-center cursor-pointer"
-                          onClick={() => setQrRevealed(true)}
-                        >
-                          <div className={`${!qrRevealed ? "blur-xl" : ""}`}>
-                            <QRCode value={activeQRData.qrToken} size={220} />
-                          </div>
-
-                          {!qrRevealed && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <p className="text-sm font-semibold text-primary">
-                                Tap to Reveal QR
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                  {/* Single State-Aware QR Box */}
+                  <div className="w-full">
+                    <div className="bg-primary/10 border border-primary/20 text-primary font-bold py-3 px-4 rounded-xl text-center mb-6 flex items-center justify-center">
+                      {activeQRData?.activeQRType === "IN" ? (
+                        <><ArrowRight className="w-5 h-5 mr-2" /> SCAN TO ENTER (IN QR)</>
                       ) : (
-                        <div className="bg-muted/20 rounded-2xl p-8 text-center border border-dashed">
-                          <Clock className="w-6 h-6 mx-auto mb-3 text-muted-foreground" />
-                          <p className="text-muted-foreground text-sm">
-                            IN QR not active. Wait for rotation...
-                          </p>
-                        </div>
+                        <><ArrowLeft className="w-5 h-5 mr-2" /> SCAN TO EXIT (OUT QR)</>
                       )}
-                    </TabsContent>
+                    </div>
 
-                    {/* ✅ OUT QR */}
-                    <TabsContent value="out">
-                      {activeQRData?.activeQRType === "OUT" && activeQRData?.qrToken ? (
-                        <div
-                          className="relative bg-white rounded-2xl p-8 flex justify-center cursor-pointer"
-                          onClick={() => setQrRevealed(true)}
-                        >
-                          <div className={`${!qrRevealed ? "blur-xl" : ""}`}>
-                            <QRCode value={activeQRData.qrToken} size={220} />
+                    {activeQRData?.qrToken ? (
+                      <div
+                        className="relative bg-white rounded-2xl p-8 flex justify-center cursor-pointer"
+                        onClick={() => setQrRevealed(true)}
+                      >
+                        <div className={`${!qrRevealed ? "blur-xl" : ""}`}>
+                          <QRCode value={activeQRData.qrToken} size={220} />
+                        </div>
+
+                        {!qrRevealed && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <p className="text-sm font-semibold text-primary">
+                              Tap to Reveal QR
+                            </p>
                           </div>
-
-                          {!qrRevealed && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <p className="text-sm font-semibold text-primary">
-                                Tap to Reveal QR
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="bg-muted/20 rounded-2xl p-8 text-center border border-dashed">
-                          <Clock className="w-6 h-6 mx-auto mb-3 text-muted-foreground" />
-                          <p className="text-muted-foreground text-sm">
-                            OUT QR not active. Wait for rotation...
-                          </p>
-                        </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-muted/20 rounded-2xl p-8 text-center border border-dashed">
+                        <Clock className="w-6 h-6 mx-auto mb-3 text-muted-foreground" />
+                        <p className="text-muted-foreground text-sm">
+                          QR not ready. Please try again...
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Copy Button */}
                   <Button

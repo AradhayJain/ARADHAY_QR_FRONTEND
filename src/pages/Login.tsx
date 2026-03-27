@@ -16,6 +16,7 @@ import {
 } from "firebase/auth";
 
 import { auth } from "../auth/firebase";
+import API from "@/api/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -50,12 +51,36 @@ const Login = () => {
 
       const token = await result.user.getIdToken();
 
-      setGoogleUserData({
+      const userData = {
         uid: result.user.uid,
         email: result.user.email,
         token,
         method: "google",
-      });
+      };
+
+      setGoogleUserData(userData);
+
+      // Check if user already exists
+      try {
+        const response = await API.get("/api/user/check-profile", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.data.exists) {
+          const finalUserData = {
+            ...userData,
+            ...response.data.data
+          };
+          
+          localStorage.setItem("focusdesk_user", JSON.stringify(finalUserData));
+          localStorage.setItem("userIdNumber", finalUserData.rollNo);
+          toast.success("✅ Logged in successfully!");
+          navigate("/");
+          return;
+        }
+      } catch (err) {
+        console.error("Error checking profile:", err);
+      }
 
       setGoogleUserReady(true);
       toast.success("✅ Google Authentication Successful! Please complete your profile.");
@@ -70,7 +95,7 @@ const Login = () => {
   /**
    * ✅ Complete Profile (Second Step)
    */
-  const handleUserDetailsSubmit = (e: React.FormEvent) => {
+  const handleUserDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userDetails.fullName || !userDetails.organisation || !userDetails.designation || !userDetails.rollNo) {
       toast.error("Please fill in all details");
@@ -78,8 +103,13 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    // Simulate slight delay before finishing
-    setTimeout(() => {
+    
+    try {
+      // ✅ Save to backend first
+      await API.post("/api/user/profile-setup", userDetails, {
+        headers: { Authorization: `Bearer ${googleUserData?.token}` }
+      });
+      
       localStorage.setItem(
         "focusdesk_user",
         JSON.stringify({
@@ -87,10 +117,15 @@ const Login = () => {
           ...userDetails,
         })
       );
+      localStorage.setItem("userIdNumber", userDetails.rollNo);
       toast.success("✅ Profile Completed & Logged In!");
       navigate("/");
+    } catch (err) {
+      console.error("Profile setup failed", err);
+      toast.error("Failed to save profile. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   const handleUserDetailsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
