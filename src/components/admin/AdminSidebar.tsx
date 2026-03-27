@@ -44,7 +44,7 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
   return (
     <>
       {/* Mobile Top Navbar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b border-border z-40 flex items-center justify-between px-4 shadow-sm">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-slate-900 border-b border-border z-40 flex items-center justify-between px-4 shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-xs">FD</span>
@@ -70,7 +70,7 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-card text-card-foreground border-r border-border z-50 transition-transform duration-300",
+          "fixed top-0 left-0 h-full w-64 bg-white dark:bg-slate-900 text-foreground border-r border-border z-50 transition-transform duration-300 shadow-xl",
           "lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
