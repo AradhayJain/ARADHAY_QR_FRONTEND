@@ -106,7 +106,10 @@ const Login = () => {
     
     try {
       // ✅ Save to backend first
-      await API.post("/api/user/profile-setup", userDetails, {
+      await API.post("/api/user/profile-setup", {
+        ...userDetails,
+        email: googleUserData?.email
+      }, {
         headers: { Authorization: `Bearer ${googleUserData?.token}` }
       });
       
@@ -120,9 +123,9 @@ const Login = () => {
       localStorage.setItem("userIdNumber", userDetails.rollNo);
       toast.success("✅ Profile Completed & Logged In!");
       navigate("/");
-    } catch (err) {
-      console.error("Profile setup failed", err);
-      toast.error("Failed to save profile. Please try again.");
+    } catch (err: any) {
+      console.error("Profile setup failed", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || err.response?.data?.error || "Failed to save profile. Please try again.");
     } finally {
       setIsLoading(false);
     }

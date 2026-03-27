@@ -7,6 +7,8 @@ import SystemSettings from "@/components/admin/SystemSettings";
 import FlaggedActivities from "@/pages/FlaggedActivities";
 import UserProfile from "@/pages/UserProfile";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import API from "@/api/api"; // Needed for setting the full SSE URL correctly
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -15,6 +17,36 @@ const AdminDashboard = () => {
     toast.success("Logged out successfully");
     navigate("/admin/login");
   };
+
+  useEffect(() => {
+    // Determine base URL dynamically if API.defaults is set
+    const baseURL = API.defaults.baseURL || import.meta.env.VITE_API_URL || "http://localhost:5000";
+    console.log("Setting up SSE connection to:", baseURL);
+    
+    const eventSource = new EventSource(`${baseURL}/api/admin/notifications/stream`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'NEW_REQUEST') {
+          toast.success(`New QR Request from ${data.user} (${data.rollNo})!`, {
+            duration: 5000,
+            icon: '🔔',
+          });
+        }
+      } catch (err) {
+        console.error("Failed to parse SSE message:", err);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error("SSE connection error", err);
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
