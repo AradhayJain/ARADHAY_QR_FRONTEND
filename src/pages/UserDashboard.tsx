@@ -129,7 +129,7 @@ const UserDashboard = () => {
     const fetchUserData = async () => {
       try {
         const response = await API.get(
-          `/api/user/qrpass-by-id/${idNumber}`
+          `/api/user/qrpass-by-id/${encodeURIComponent(idNumber)}`
         );
 
         setUserData(response.data);
@@ -164,7 +164,7 @@ const UserDashboard = () => {
 
     const fetchActiveQR = async () => {
       try {
-        const response = await API.get(`/api/user/active-qr/${idNumber}`);
+        const response = await API.get(`/api/user/active-qr/${encodeURIComponent(idNumber)}`);
         setActiveQRData(response.data);
 
         // No need to set active tab anymore, UI auto-updates based on activeQRType
@@ -184,7 +184,7 @@ const UserDashboard = () => {
    */
   const fetchCalendar = async () => {
     try {
-      const response = await API.get(`/api/user/calendar/${idNumber}`);
+      const response = await API.get(`/api/user/calendar/${encodeURIComponent(idNumber)}`);
       setCalendar(response.data.calendar || []);
       setShowCalendar(true);
     } catch (err) {
