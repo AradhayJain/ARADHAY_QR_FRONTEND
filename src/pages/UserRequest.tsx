@@ -69,10 +69,10 @@ const UserRequest = () => {
     }
 
     // ✅ Block slashes in roll number
-    if (formData.collegeId.includes("/")) {
-      toast.error("Use format like 24CSE250 (no / allowed)");
-      return;
-    }
+    // if (formData.collegeId.includes("/")) {
+    //   toast.error("Use format like 24CSE250 (no / allowed)");
+    //   return;
+    // }
 
     const validFromDate = new Date(formData.validFrom);
     const validUntilDate = new Date(formData.validUntil);
