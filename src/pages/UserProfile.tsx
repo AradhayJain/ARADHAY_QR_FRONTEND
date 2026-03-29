@@ -22,7 +22,7 @@ const UserProfile = () => {
 
   const fetchProfile = async () => {
     try {
-      const res = await API.get(`/api/admin/user-profile/${id}`);
+      const res = await API.get(`/api/admin/user-profile/${encodeURIComponent(id)}`);
       setProfile(res.data);
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to load profile");
@@ -174,7 +174,7 @@ const UserProfile = () => {
             <CardTitle>Activity Calendar (90 Days)</CardTitle>
           </CardHeader>
           <CardContent>
-            <AdminUserActivity userId={profile.user._id} />
+            <AdminUserActivity userId={profile.user._id || profile.user.id} />
           </CardContent>
         </Card>
 

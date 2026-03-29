@@ -65,6 +65,14 @@ const ApprovedUsersTable = () => {
     });
   };
 
+  // Convert UTC ISO string → local "YYYY-MM-DDTHH:MM" for datetime-local input
+  const toLocalDatetimeInput = (isoString: string) => {
+    if (!isoString) return "";
+    const d = new Date(isoString);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const getAccessStatus = (from: string, until: string) => {
     const now = new Date();
     const start = new Date(from);
@@ -204,8 +212,9 @@ const ApprovedUsersTable = () => {
                     className="border-blue-500 text-blue-600"
                     onClick={() => {
                       setEditUserId(u._id);
-                      setEditValidFrom(u.validFrom);
-                      setEditValidUntil(u.validUntil);
+                      // Convert UTC → local time so datetime-local input shows correct local time
+                      setEditValidFrom(toLocalDatetimeInput(u.validFrom));
+                      setEditValidUntil(toLocalDatetimeInput(u.validUntil));
                       setEditComment("");
                     }}
                   >
@@ -235,7 +244,7 @@ const ApprovedUsersTable = () => {
                       <Input
                         type="datetime-local"
                         className="bg-slate-50 border-slate-200 text-slate-800 focus:ring-primary/20"
-                        value={editValidFrom?.slice(0, 16)}
+                        value={editValidFrom}
                         onChange={e => setEditValidFrom(e.target.value)}
                       />
                     </div>
@@ -244,7 +253,7 @@ const ApprovedUsersTable = () => {
                       <Input
                         type="datetime-local"
                         className="bg-slate-50 border-slate-200 text-slate-800 focus:ring-primary/20"
-                        value={editValidUntil?.slice(0, 16)}
+                        value={editValidUntil}
                         onChange={e => setEditValidUntil(e.target.value)}
                       />
                     </div>
@@ -266,9 +275,10 @@ const ApprovedUsersTable = () => {
                         onClick={async () => {
                           setActionLoading(true);
                           try {
+                            // Convert local datetime-local value → proper ISO string for backend
                             await API.patch(`/api/admin/update-validity/${editUserId}`, {
-                              validFrom: editValidFrom,
-                              validUntil: editValidUntil,
+                              validFrom: new Date(editValidFrom).toISOString(),
+                              validUntil: new Date(editValidUntil).toISOString(),
                               comment: editComment,
                             });
                             toast.success("Validity updated");
