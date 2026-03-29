@@ -43,7 +43,7 @@ const MyProfile = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await API.get(`/api/user/profile/${idNumber}`);
+      const res = await API.get(`/api/user/profile/${encodeURIComponent(idNumber)}`);
       setProfile(res.data.profile);
       setFormData({
         profilePicture: res.data.profile.profilePicture || "",
@@ -86,7 +86,7 @@ const MyProfile = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await API.put(`/api/user/profile/${idNumber}`, formData);
+      await API.put(`/api/user/profile/${encodeURIComponent(idNumber)}`, formData);
       toast.success("Profile updated successfully!");
       setEditing(false);
       fetchProfile();
