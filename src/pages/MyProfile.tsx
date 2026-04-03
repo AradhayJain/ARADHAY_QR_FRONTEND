@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Camera, Save, User, Mail, Phone, Building2, Calendar, FileText, Loader2 } from "lucide-react";
+import { Camera, Save, User, Mail, Phone, Building2, Calendar, FileText, Loader2, Settings } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/layout/Navbar";
 import API from "@/api/api";
 
@@ -27,6 +28,7 @@ const MyProfile = () => {
     department: "",
     year: "",
     bio: "",
+    preferredMachineId: "",
   });
 
   const idNumber = localStorage.getItem("userIdNumber") || "";
@@ -52,6 +54,7 @@ const MyProfile = () => {
         department: res.data.profile.department || "",
         year: res.data.profile.year || "",
         bio: res.data.profile.bio || "",
+        preferredMachineId: res.data.profile.preferredMachineId || "",
       });
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to load profile");
@@ -106,6 +109,7 @@ const MyProfile = () => {
       department: profile?.department || "",
       year: profile?.year || "",
       bio: profile?.bio || "",
+      preferredMachineId: profile?.preferredMachineId || "",
     });
   };
 
@@ -273,6 +277,29 @@ const MyProfile = () => {
                     rows={4}
                     className={!editing ? "bg-muted/50" : ""}
                   />
+                </div>
+
+                {/* Preferred Machine */}
+                <div>
+                  <Label className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <Settings className="w-4 h-4" />
+                    Preferred Machine
+                  </Label>
+                  <Select 
+                    value={formData.preferredMachineId} 
+                    onValueChange={(value) => setFormData({ ...formData, preferredMachineId: value })} 
+                    disabled={!editing}
+                  >
+                    <SelectTrigger className={!editing ? "bg-muted/50" : ""}>
+                      <SelectValue placeholder="Select Machine" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="machine1">Machine 1 (Gate A)</SelectItem>
+                      <SelectItem value="machine2">Machine 2 (Gate B)</SelectItem>
+                      <SelectItem value="gateA">Gate A</SelectItem>
+                      <SelectItem value="gateB">Gate B</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Validity Info (Read-only) */}

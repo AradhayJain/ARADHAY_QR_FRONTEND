@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Loader2, Shield, Lock, User } from "lucide-react";
@@ -31,6 +32,7 @@ const Login = () => {
     organisation: "",
     designation: "",
     rollNo: "",
+    preferredMachineId: "",
   });
 
   // Admin form
@@ -38,6 +40,23 @@ const Login = () => {
     email: "",
     password: "",
   });
+
+  const [availableMachines, setAvailableMachines] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Fetch dynamic machine list for the dropdown
+    const fetchMachines = async () => {
+      try {
+        const response = await API.get("/api/user/machines");
+        if (response.data.success && response.data.machines) {
+          setAvailableMachines(response.data.machines);
+        }
+      } catch (err) {
+        console.error("Failed to load machines:", err);
+      }
+    };
+    fetchMachines();
+  }, []);
 
   /**
    * ✅ Google Login (First Step)
@@ -97,8 +116,8 @@ const Login = () => {
    */
   const handleUserDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userDetails.fullName || !userDetails.organisation || !userDetails.designation || !userDetails.rollNo) {
-      toast.error("Please fill in all details");
+    if (!userDetails.fullName || !userDetails.organisation || !userDetails.designation || !userDetails.rollNo || !userDetails.preferredMachineId) {
+      toast.error("Please fill in all details including preferred machine");
       return;
     }
 
@@ -131,7 +150,7 @@ const Login = () => {
     }
   };
 
-  const handleUserDetailsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUserDetailsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setUserDetails((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -264,6 +283,28 @@ const Login = () => {
                       onChange={handleUserDetailsChange}
                       required
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="preferredMachineId">Preferred Machine</Label>
+                    <Select value={userDetails.preferredMachineId} onValueChange={(value) => setUserDetails({...userDetails, preferredMachineId: value})} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Machine" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableMachines.length > 0 ? (
+                          availableMachines.map((m) => (
+                            <SelectItem key={m} value={m}>
+                              {m.includes("_") ? m.replace(/_/g, " ") : `Machine: ${m}`}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <>
+                            <SelectItem value="GATE_A_MAIN">GATE A MAIN</SelectItem>
+                            <SelectItem value="GATE_B_MAIN">GATE B MAIN</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button
                     type="submit"

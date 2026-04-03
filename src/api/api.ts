@@ -6,15 +6,15 @@ import axios from "axios";
 // Change this based on environment:
 //
 // FOR LOCALHOST TESTING (CURRENTLY ACTIVE):
-// const API = axios.create({
-//   baseURL: "http://localhost:5000",
-// });
+const API = axios.create({
+  baseURL: "http://localhost:5000",
+});
 
 // FOR PRODUCTION DEPLOYMENT:
 // Uncomment the line below and comment the localhost line above
-const API = axios.create({
-  baseURL: "https://aradhay-qr-backend.onrender.com",
-});
+// const API = axios.create({
+//   baseURL: "https://aradhay-qr-backend.onrender.com",
+// });
 //
 // ⚠️ When deploying frontend:
 // 1. Change baseURL to your deployed backend URL
@@ -54,5 +54,9 @@ API.interceptors.request.use(async (req) => {
 
   return req;
 });
+
+// QR Token Machine Flow
+export const allocateQR = (data: { idNumber: string; machineId?: string }) => API.post("/api/user/allocate-qr", data);
+export const confirmEntry = (data: { tokenId: string; idNumber: string; enteredSuccessfully: boolean; machineId?: string }) => API.post("/api/user/confirm-entry", data);
 
 export default API;

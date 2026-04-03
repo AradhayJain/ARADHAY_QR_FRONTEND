@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from "react";
 import API from "@/api/api";
 
-interface QRRequest {
+interface AccessRequest {
   _id: string;
-  valid_from: string;
-  valid_until: string;
-  created_at: string;
-  status: "UPCOMING" | "ACTIVE" | "EXPIRED";
+  validFrom: string;
+  validUntil: string;
+  createdAt: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  currentState: string;
 }
 
 const MyQRRequests: React.FC = () => {
-  const [qrs, setQrs] = useState<QRRequest[]>([]);
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchQrs = async () => {
+  const fetchRequests = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await API.get("/api/qr/my");
-      setQrs(res.data.qrs || []);
+      // Points to the new updated backend route
+      const res = await API.get("/api/user/requests");
+      setRequests(res.data.requests || []);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load requests");
     } finally {
@@ -27,33 +29,41 @@ const MyQRRequests: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchQrs(); }, []);
-
-  const handleDelete = async (id: string) => {
-    try {
-      await API.delete(`/api/qr/${id}`);
-      fetchQrs();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Delete failed");
-    }
-  };
+  useEffect(() => { fetchRequests(); }, []);
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">My QR Requests</h2>
-      {loading ? <div>Loading...</div> : error ? <div className="text-red-500">{error}</div> : (
+      <h2 className="text-xl font-bold mb-4">My Access History</h2>
+      {loading ? (
+        <div className="animate-pulse text-gray-500">Loading requests...</div>
+      ) : error ? (
+        <div className="text-red-500">{error}</div>
+      ) : requests.length === 0 ? (
+        <div className="text-gray-500">No access requests found.</div>
+      ) : (
         <ul className="space-y-3">
-          {qrs.map(qr => (
-            <li key={qr._id} className="p-4 border rounded-lg flex items-center justify-between">
+          {requests.map(req => (
+            <li key={req._id} className="p-4 border border-white/10 bg-white/5 rounded-lg flex items-center justify-between">
               <div>
-                <div className="font-medium">{new Date(qr.valid_from).toLocaleString()} → {new Date(qr.valid_until).toLocaleString()}</div>
-                <div className="text-xs text-muted-foreground">Status: <span className={
-                  qr.status === "ACTIVE" ? "text-green-600" : qr.status === "UPCOMING" ? "text-blue-600" : "text-gray-400"
-                }>{qr.status}</span></div>
+                <div className="font-medium text-sm md:text-base">
+                  {new Date(req.validFrom).toLocaleDateString()} → {new Date(req.validUntil).toLocaleDateString()}
+                </div>
+                <div className="text-xs mt-1 text-muted-foreground">
+                  Status: 
+                  <span className={`ml-1 font-bold ${
+                    req.status === "APPROVED" ? "text-green-500" : 
+                    req.status === "PENDING" ? "text-yellow-500" : 
+                    "text-red-500"
+                  }`}>
+                    {req.status}
+                  </span>
+                </div>
+                {req.status === "APPROVED" && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Current Location: <span className="text-blue-400 font-semibold">{req.currentState}</span>
+                  </div>
+                )}
               </div>
-              {qr.status === "UPCOMING" && (
-                <button className="btn btn-danger" onClick={() => handleDelete(qr._id)}>Delete</button>
-              )}
             </li>
           ))}
         </ul>

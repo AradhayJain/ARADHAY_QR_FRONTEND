@@ -120,7 +120,7 @@ const UserRequest = () => {
   // ✅ Navigate to dashboard with ID stored
   const handleViewStatus = () => {
     localStorage.setItem("userIdNumber", formData.collegeId);
-    navigate(`/user/dashboard?id=${formData.collegeId}`);
+    navigate(`/user/viewqr`);
   };
 
   return (
