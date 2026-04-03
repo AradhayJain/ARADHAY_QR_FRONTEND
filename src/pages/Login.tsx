@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Mail, Loader2, Shield, Lock, User } from "lucide-react";
+import { ArrowLeft, Mail, Loader2, Shield, Lock, User, Monitor, Cpu, ChevronRight, Building, Briefcase, Hash } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -240,78 +240,140 @@ const Login = () => {
                 </Button>
               ) : (
                 <form onSubmit={handleUserDetailsSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      name="fullName"
-                      placeholder="John Doe"
-                      value={userDetails.fullName}
-                      onChange={handleUserDetailsChange}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="organisation">Organisation</Label>
-                    <Input
-                      id="organisation"
-                      name="organisation"
-                      placeholder="Company / College"
-                      value={userDetails.organisation}
-                      onChange={handleUserDetailsChange}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="designation">Designation</Label>
-                    <Input
-                      id="designation"
-                      name="designation"
-                      placeholder="Student / Employee"
-                      value={userDetails.designation}
-                      onChange={handleUserDetailsChange}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rollNo">Roll No / ID</Label>
-                    <Input
-                      id="rollNo"
-                      name="rollNo"
-                      placeholder="e.g. 123456"
-                      value={userDetails.rollNo}
-                      onChange={handleUserDetailsChange}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="preferredMachineId">Preferred Machine</Label>
-                    <Select value={userDetails.preferredMachineId} onValueChange={(value) => setUserDetails({...userDetails, preferredMachineId: value})} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Machine" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableMachines.length > 0 ? (
-                          availableMachines.map((m) => (
-                            <SelectItem key={m} value={m}>
-                              {m.includes("_") ? m.replace(/_/g, " ") : `Machine: ${m}`}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <>
-                            <SelectItem value="GATE_A_MAIN">GATE A MAIN</SelectItem>
-                            <SelectItem value="GATE_B_MAIN">GATE B MAIN</SelectItem>
-                          </>
-                        )}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <div className="relative">
+                        <Input
+                          id="fullName"
+                          name="fullName"
+                          placeholder="John Doe"
+                          value={userDetails.fullName}
+                          onChange={handleUserDetailsChange}
+                          required
+                          className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-all"
+                        />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="organisation">Organisation</Label>
+                        <div className="relative">
+                          <Input
+                            id="organisation"
+                            name="organisation"
+                            placeholder="Company / College"
+                            value={userDetails.organisation}
+                            onChange={handleUserDetailsChange}
+                            required
+                            className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-all"
+                          />
+                          <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="designation">Designation</Label>
+                        <div className="relative">
+                          <Input
+                            id="designation"
+                            name="designation"
+                            placeholder="Student / Employee"
+                            value={userDetails.designation}
+                            onChange={handleUserDetailsChange}
+                            required
+                            className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-all"
+                          />
+                          <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="rollNo">Roll No / ID</Label>
+                      <div className="relative">
+                        <Input
+                          id="rollNo"
+                          name="rollNo"
+                          placeholder="e.g. 123456"
+                          value={userDetails.rollNo}
+                          onChange={handleUserDetailsChange}
+                          required
+                          className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-all"
+                        />
+                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="preferredMachineId">Preferred Machine</Label>
+                      <Select 
+                        value={userDetails.preferredMachineId} 
+                        onValueChange={(value) => setUserDetails({...userDetails, preferredMachineId: value})} 
+                        required
+                      >
+                        <SelectTrigger className="h-11 bg-white/5 border-white/10 focus:ring-primary/50 transition-all">
+                          <div className="flex items-center gap-2">
+                            <Monitor className="w-4 h-4 text-primary" />
+                            <SelectValue placeholder="Identify your entry gate" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="glass-card border-white/20 backdrop-blur-xl">
+                          {availableMachines.length > 0 ? (
+                            availableMachines.map((m) => (
+                              <SelectItem key={m} value={m} className="py-3 cursor-pointer focus:bg-primary/10 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                    {m.toLowerCase().includes('gate') ? <Monitor className="w-4 h-4" /> : <Cpu className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">
+                                      {m.includes("_") ? m.replace(/_/g, " ") : m}
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                                      Hardware ID: {m.slice(0, 8)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <>
+                              <SelectItem value="GATE_A_MAIN" className="py-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                    <Monitor className="w-4 h-4" />
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">GATE A MAIN</span>
+                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Primary Entrance</span>
+                                  </div>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="GATE_B_MAIN" className="py-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                    <Monitor className="w-4 h-4" />
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">GATE B MAIN</span>
+                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Secondary Exit</span>
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-12 mt-2"
+                    className="w-full h-12 mt-6 btn-gradient font-semibold tracking-wide"
                   >
-                    {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Complete Login"}
+                    {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Finalize Profile"}
                   </Button>
                 </form>
               )}
