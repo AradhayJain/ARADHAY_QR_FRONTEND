@@ -76,7 +76,7 @@ const ViewMyQR = () => {
             if (allocatedPassType === "IN") {
               window.location.reload();
             } else {
-              navigate("/user/dashboard");
+              navigate("/");
             }
           }
         } catch (err) {
