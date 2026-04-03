@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Mail, Loader2, Shield, Lock, User, Monitor, Cpu, ChevronRight, Building, Briefcase, Hash } from "lucide-react";
+import { ArrowLeft, Mail, Loader2, Shield, Lock, User, Monitor, Cpu, ChevronRight, Building, Briefcase, Hash, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -35,13 +35,14 @@ const Login = () => {
     preferredMachineId: "",
   });
 
-  // Admin form
   const [adminFormData, setAdminFormData] = useState({
     email: "",
     password: "",
   });
 
   const [availableMachines, setAvailableMachines] = useState<string[]>([]);
+  const [rollNoAvailable, setRollNoAvailable] = useState<boolean | null>(null);
+  const [isCheckingRoll, setIsCheckingRoll] = useState(false);
 
   useEffect(() => {
     // Fetch dynamic machine list for the dropdown
@@ -57,6 +58,28 @@ const Login = () => {
     };
     fetchMachines();
   }, []);
+
+  // Debounced Roll No Check
+  useEffect(() => {
+    if (!userDetails.rollNo || userDetails.rollNo.length < 3) {
+      setRollNoAvailable(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsCheckingRoll(true);
+      try {
+        const response = await API.get(`/api/user/check-rollno/${userDetails.rollNo}?uid=${googleUserData?.uid || ""}`);
+        setRollNoAvailable(response.data.available);
+      } catch (err) {
+        console.error("Check failed", err);
+      } finally {
+        setIsCheckingRoll(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [userDetails.rollNo, googleUserData?.uid]);
 
   /**
    * ✅ Google Login (First Step)
@@ -118,6 +141,11 @@ const Login = () => {
     e.preventDefault();
     if (!userDetails.fullName || !userDetails.organisation || !userDetails.designation || !userDetails.rollNo || !userDetails.preferredMachineId) {
       toast.error("Please fill in all details including preferred machine");
+      return;
+    }
+
+    if (rollNoAvailable === false) {
+      toast.error("The selected Roll Number / ID is already taken");
       return;
     }
 
@@ -300,10 +328,27 @@ const Login = () => {
                           value={userDetails.rollNo}
                           onChange={handleUserDetailsChange}
                           required
-                          className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-all"
+                          className={`pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-all ${
+                            rollNoAvailable === false ? "border-destructive/50 focus:border-destructive" : 
+                            rollNoAvailable === true ? "border-green-500/50 focus:border-green-500" : ""
+                          }`}
                         />
                         <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          {isCheckingRoll ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                          ) : rollNoAvailable === true ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          ) : rollNoAvailable === false ? (
+                            <XCircle className="w-4 h-4 text-destructive" />
+                          ) : null}
+                        </div>
                       </div>
+                      {rollNoAvailable === false && (
+                        <p className="text-[10px] text-destructive font-medium ml-1">
+                          This ID is already registered to another account.
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
