@@ -5,18 +5,18 @@ import { Loader2, QrCode, ScanFace, CheckCircle2, XCircle, DoorOpen } from "luci
 import { toast } from "sonner";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
-import QRCode from "react-qr-code"; 
+import QRCode from "react-qr-code";
 import { Progress } from "@/components/ui/progress";
 
 const ViewMyQR = () => {
   const navigate = useNavigate();
-  
+
   const [qrString, setQrString] = useState<string | null>(null);
   const [passType, setPassType] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [targetMachine, setTargetMachine] = useState<string | null>(null);
-  
+
   const [countdown, setCountdown] = useState(20);
 
   const pollRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,7 +43,7 @@ const ViewMyQR = () => {
     }
 
     const user = JSON.parse(userStr);
-    const userRollNo = user.rollNo || user.idNumber; 
+    const userRollNo = user.rollNo || user.idNumber;
     const preferredMachine = user.preferredMachineId || user.preferredMachine || user.machineId || "GATE_A_MAIN";
     setTargetMachine(preferredMachine);
 
@@ -52,13 +52,13 @@ const ViewMyQR = () => {
       clearTimers();
       setCountdown(20);
 
-      const res = await API.post("/api/user/allocate-qr", { 
+      const res = await API.post("/api/user/allocate-qr", {
         idNumber: userRollNo,
-        machineId: preferredMachine 
+        machineId: preferredMachine
       });
-      
+
       const { qrData, passType: allocatedPassType, currentState: initialDBState } = res.data;
-      
+
       setQrString(qrData);
       setPassType(allocatedPassType);
       toast.success(`Access Pass Allocated for ${preferredMachine}`);
@@ -90,9 +90,11 @@ const ViewMyQR = () => {
           if (prev <= 1) {
             clearTimers();
             if (allocatedPassType === "IN") {
-              setShowConfirm(true); 
+              setShowConfirm(true);
             } else {
-              executeAutoExit(userRollNo);
+              // executeAutoExit(userRollNo);
+              navigate("/");
+
             }
             return 0;
           }
@@ -110,15 +112,15 @@ const ViewMyQR = () => {
 
   const executeAutoExit = async (rollNo: string) => {
     try {
-      await API.post("/api/user/confirm-entry", { 
-        idNumber: rollNo, 
-        enteredSuccessfully: true 
+      await API.post("/api/user/confirm-entry", {
+        idNumber: rollNo,
+        enteredSuccessfully: true
       });
       toast.success("Exit logged successfully. Have a great day!");
     } catch (err) {
       console.error("Auto-exit failed", err);
     } finally {
-      navigate("/"); 
+      navigate("/");
     }
   };
 
@@ -127,14 +129,14 @@ const ViewMyQR = () => {
     const userRollNo = userStr ? JSON.parse(userStr).rollNo || JSON.parse(userStr).idNumber : null;
 
     try {
-      await API.post("/api/user/confirm-entry", { 
-        idNumber: userRollNo, 
-        enteredSuccessfully: success 
+      await API.post("/api/user/confirm-entry", {
+        idNumber: userRollNo,
+        enteredSuccessfully: success
       });
-      
+
       toast.success(success ? "Location state updated!" : "Access pass released.");
       setShowConfirm(false);
-      window.location.reload(); 
+      window.location.reload();
     } catch (err) {
       toast.error("Failed to update status.");
     }
@@ -149,12 +151,12 @@ const ViewMyQR = () => {
   return (
     <div className="min-h-screen bg-hero-gradient flex flex-col">
       <Navbar />
-      
+
       <main className="flex-1 flex flex-col items-center justify-center p-4 pt-24 pb-12">
         <div className={`glass-card w-full max-w-sm relative transition-all duration-500 ease-out 
           bg-card/90 backdrop-blur-xl border shadow-2xl rounded-[2rem] overflow-hidden
           ${qrString ? themeBorder : 'border-border'}`}>
-          
+
           {/* Subtle top glow */}
           <div className={`absolute top-0 inset-x-0 h-1 ${qrString ? (isEntry ? 'bg-emerald-500' : 'bg-blue-500') : 'bg-primary/50'} transition-colors duration-500`} />
 
@@ -172,18 +174,18 @@ const ViewMyQR = () => {
                   Please confirm if you successfully passed through the gate so we can update your live location.
                 </p>
                 <div className="flex flex-col gap-3 w-full">
-                  <Button 
+                  <Button
                     size="lg"
-                    className="w-full rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/10 font-semibold text-lg" 
+                    className="w-full rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/10 font-semibold text-lg"
                     onClick={() => handleConfirmation(true)}
                   >
                     <CheckCircle2 className="w-5 h-5 mr-2" />
                     Yes, I entered
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="lg"
-                    className="w-full rounded-2xl" 
+                    className="w-full rounded-2xl"
                     onClick={() => handleConfirmation(false)}
                   >
                     <XCircle className="w-5 h-5 mr-2" />
@@ -204,15 +206,15 @@ const ViewMyQR = () => {
                         <QrCode className="w-12 h-12 text-foreground/70" />
                       </div>
                     </div>
-                    
+
                     <h2 className="text-2xl font-bold text-foreground mb-3 tracking-tight">Access Terminal</h2>
                     <p className="text-muted-foreground text-sm mb-10 px-2 leading-relaxed">
                       Stand near the hardware scanner and click below to generate your secure, single-use access token.
                     </p>
-                    
-                    <Button 
-                      size="lg" 
-                      onClick={generateToken} 
+
+                    <Button
+                      size="lg"
+                      onClick={generateToken}
                       disabled={loading}
                       className="w-full rounded-2xl h-14 text-lg font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
@@ -234,11 +236,11 @@ const ViewMyQR = () => {
                   // 3. ACTIVE QR SCREEN
                   // ----------------------------------------------------
                   <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center">
-                    
+
                     <div className={`inline-flex items-center justify-center px-4 py-1.5 rounded-full font-bold text-xs mb-6 tracking-widest ${themeBg} ${themeColor} border ${themeBorder}`}>
                       {isEntry ? 'ENTRY AUTHORIZED' : 'EXIT AUTHORIZED'}
                     </div>
-                    
+
                     {/* QR Code Container with scanning effect illusion */}
                     <div className="relative p-5 bg-white rounded-3xl shadow-lg border-2 border-slate-100 mb-6 group">
                       <QRCode value={qrString || ""} size={220} level="H" />
@@ -247,13 +249,13 @@ const ViewMyQR = () => {
                         <div className={`w-full h-1 ${isEntry ? 'bg-emerald-500' : 'bg-blue-500'} shadow-[0_0_15px_rgba(0,0,0,0.3)] opacity-60 absolute top-0 animate-[scan_3s_ease-in-out_infinite]`} />
                       </div>
                     </div>
-                    
+
                     <div className="w-full space-y-4">
                       <div className="flex items-center justify-between text-xs font-mono text-muted-foreground bg-secondary/50 py-2 px-4 rounded-xl border border-border">
                         <span className="uppercase tracking-wider">Gate</span>
                         <span className="text-foreground font-semibold">{targetMachine}</span>
                       </div>
-                      
+
                       {/* Countdown & Progress */}
                       <div className="space-y-2 pt-2">
                         <div className="flex justify-between text-xs font-medium text-muted-foreground px-1">
@@ -275,7 +277,7 @@ const ViewMyQR = () => {
           </div>
         </div>
       </main>
-      
+
       {/* Required for the scanning animation */}
       <style>{`
         @keyframes scan {
