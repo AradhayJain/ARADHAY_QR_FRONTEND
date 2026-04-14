@@ -13,6 +13,8 @@ const SystemSettings = () => {
   const [saving, setSaving] = useState(false);
   const [restrictionDuration, setRestrictionDuration] = useState<number>(10);
   const [originalDuration, setOriginalDuration] = useState<number>(10);
+  const [flaggingWindow, setFlaggingWindow] = useState<number>(2);
+  const [originalWindow, setOriginalWindow] = useState<number>(2);
 
   useEffect(() => {
     fetchSettings();
@@ -23,8 +25,12 @@ const SystemSettings = () => {
       setLoading(true);
       const res = await API.get("/api/admin/settings/restriction");
       const duration = res.data.restrictionDurationMinutes;
+      const window = res.data.flaggingWindowMinutes;
+      
       setRestrictionDuration(duration);
       setOriginalDuration(duration);
+      setFlaggingWindow(window);
+      setOriginalWindow(window);
     } catch (err: any) {
       toast.error("Failed to load settings");
       console.error(err);
@@ -35,12 +41,12 @@ const SystemSettings = () => {
 
   const handleSave = async () => {
     // Validation
-    if (restrictionDuration < 1 || restrictionDuration > 120) {
-      toast.error("Duration must be between 1 and 120 minutes");
+    if (flaggingWindow < 1 || flaggingWindow > 60) {
+      toast.error("Flagging window must be between 1 and 60 minutes");
       return;
     }
 
-    if (restrictionDuration === originalDuration) {
+    if (restrictionDuration === originalDuration && flaggingWindow === originalWindow) {
       toast.info("No changes to save");
       return;
     }
@@ -49,10 +55,12 @@ const SystemSettings = () => {
       setSaving(true);
       await API.put("/api/admin/settings/restriction", {
         durationMinutes: restrictionDuration,
+        flaggingWindowMinutes: flaggingWindow,
       });
 
       setOriginalDuration(restrictionDuration);
-      toast.success("Restriction duration updated successfully");
+      setOriginalWindow(flaggingWindow);
+      toast.success("System settings updated successfully");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to update settings");
       console.error(err);
@@ -63,9 +71,10 @@ const SystemSettings = () => {
 
   const handleReset = () => {
     setRestrictionDuration(originalDuration);
+    setFlaggingWindow(originalWindow);
   };
 
-  const hasChanges = restrictionDuration !== originalDuration;
+  const hasChanges = restrictionDuration !== originalDuration || flaggingWindow !== originalWindow;
 
   if (loading) {
     return (
@@ -122,11 +131,30 @@ const SystemSettings = () => {
                   disabled={saving}
                 />
                 <span className="text-sm text-muted-foreground">
-                  (Min: 1, Max: 120 minutes)
+                  How long users are blocked after abuse (1-120 min)
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="window">Abuse Detection Window (minutes)</Label>
+              <div className="flex items-center gap-4">
+                <Input
+                  id="window"
+                  type="number"
+                  min={1}
+                  max={60}
+                  value={flaggingWindow}
+                  onChange={(e) => setFlaggingWindow(parseInt(e.target.value) || 1)}
+                  className="max-w-[200px]"
+                  disabled={saving}
+                />
+                <span className="text-sm text-muted-foreground">
+                  Time gap between OUT and IN scans (1-60 min)
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Current: {restrictionDuration} minute{restrictionDuration !== 1 ? "s" : ""}
+                Current: {flaggingWindow} minute{flaggingWindow !== 1 ? "s" : ""}
               </p>
             </div>
 
@@ -160,10 +188,10 @@ const SystemSettings = () => {
           <div className="pt-4 border-t">
             <h4 className="text-sm font-semibold mb-2">How it works:</h4>
             <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-              <li>User scans IN at gate</li>
-              <li>User scans OUT within 1 minute</li>
-              <li>System flags as potential abuse</li>
-              <li>User is restricted for {restrictionDuration} minute{restrictionDuration !== 1 ? "s" : ""}</li>
+              <li>User scans OUT at gate</li>
+              <li>User scans IN within {flaggingWindow} minute{flaggingWindow !== 1 ? "s" : ""}</li>
+              <li>System flags as proxy attendance abuse</li>
+              <li>User is automatically restricted for {restrictionDuration} minute{restrictionDuration !== 1 ? "s" : ""}</li>
               <li>Activity appears in "Flagged Activities" page</li>
               <li>Attendance log shows red highlight</li>
             </ul>

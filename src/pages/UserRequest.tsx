@@ -10,6 +10,8 @@ import { Loader2, CheckCircle2, Clock } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/layout/Navbar";
 import API from "@/api/api";
+import DecorationBackground from "@/components/ui/DecorationBackground";
+
 
 const UserRequest = () => {
   const navigate = useNavigate();
@@ -124,7 +126,9 @@ const UserRequest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-hero-gradient">
+    <div className="min-h-screen relative overflow-hidden bg-slate-50/50">
+      <DecorationBackground />
+
       <Navbar />
 
       <div className="container mx-auto px-4 pt-24 pb-16">

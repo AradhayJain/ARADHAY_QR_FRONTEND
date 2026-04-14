@@ -18,6 +18,8 @@ import {
 
 import { auth } from "../auth/firebase";
 import API from "@/api/api";
+import DecorationBackground from "@/components/ui/DecorationBackground";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -212,12 +214,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-hero-gradient flex items-center justify-center p-4">
-      {/* Background decoration mirroring AdminLogin */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen relative overflow-hidden bg-slate-50/50 flex items-center justify-center p-4">
+      <DecorationBackground />
+
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}

@@ -6,15 +6,15 @@ import axios from "axios";
 // Change this based on environment:
 //
 // FOR LOCALHOST TESTING (CURRENTLY ACTIVE):
-// const API = axios.create({
-//   baseURL: "http://localhost:5000",
-// });
+const API = axios.create({
+  baseURL: "http://localhost:5000",
+});
 
 // FOR PRODUCTION DEPLOYMENT:
 // Uncomment the line below and comment the localhost line above
-const API = axios.create({
-  baseURL: "https://new-twxg.onrender.com",
-});
+// const API = axios.create({
+//   baseURL: "https://new-twxg.onrender.com",
+// });
 //
 // ⚠️ When deploying frontend:
 // 1. Change baseURL to your deployed backend URL

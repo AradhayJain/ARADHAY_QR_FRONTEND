@@ -13,6 +13,8 @@ import API from "@/api/api";
 import ContributionCalendar from "@/components/ContributionCalendar";
 
 import QRCode from "react-qr-code";
+import DecorationBackground from "@/components/ui/DecorationBackground";
+
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -139,7 +141,11 @@ const UserDashboard = () => {
         if (response.data.status !== "PENDING") {
           clearInterval(interval);
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          navigate("/user/request");
+          return;
+        }
         setError(true);
         setLoading(false);
       }
@@ -336,7 +342,9 @@ const UserDashboard = () => {
    * ✅ APPROVED - Show QR Dashboard
    */
   return (
-    <div className="min-h-screen bg-hero-gradient">
+    <div className="min-h-screen relative overflow-hidden bg-slate-50/50">
+      <DecorationBackground />
+
       <Navbar />
 
       <div className="container mx-auto px-4 pt-24 pb-16">
@@ -352,13 +360,31 @@ const UserDashboard = () => {
               </p>
             </div>
 
+            {/* Flagged Warning */}
+            {activeQRData?.isFlagged && (
+              <div className="bg-orange-500/10 border border-orange-500/50 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-2 text-orange-600 mb-1">
+                  <span className="text-xl">🚩</span>
+                  <p className="font-bold">Account Flagged</p>
+                </div>
+                <p className="text-sm text-muted-foreground font-medium">
+                  {activeQRData.flagReason || "Suspicious activity detected."}
+                </p>
+              </div>
+            )}
+
             {/* Restriction Warning */}
             {activeQRData?.status === "RESTRICTED" && (
-              <div className="bg-destructive/10 border border-destructive rounded-xl p-4 mb-6">
-                <p className="text-destructive font-semibold">⚠️ Temporarily Restricted</p>
+              <div className="bg-destructive/10 border border-destructive rounded-xl p-4 mb-6 shadow-sm">
+                <div className="flex items-center gap-2 text-destructive mb-1">
+                  <Clock className="w-5 h-5" />
+                  <p className="font-bold">Temporarily Restricted</p>
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  Multiple rapid scans detected. Access restricted until{" "}
-                  {new Date(activeQRData.restrictionUntil).toLocaleTimeString()}
+                  Access restricted until{" "}
+                  <span className="font-bold text-foreground">
+                    {new Date(activeQRData.restrictionUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </p>
               </div>
             )}
