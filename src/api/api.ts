@@ -13,7 +13,7 @@ import axios from "axios";
 // FOR PRODUCTION DEPLOYMENT:
 // Uncomment the line below and comment the localhost line above
 const API = axios.create({
-  baseURL: "https://focusdesk-backend-792829193717.us-centrali.run.app",
+  baseURL: "https://focusdesk-backend-792829193717.us-central1.run.app",
 });
 //
 // ⚠️ When deploying frontend:
