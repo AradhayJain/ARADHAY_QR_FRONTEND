@@ -13,7 +13,7 @@ import axios from "axios";
 // FOR PRODUCTION DEPLOYMENT:
 // Uncomment the line below and comment the localhost line above
 const API = axios.create({
-  baseURL: "https://new-twxg.onrender.com",
+  baseURL: "https://new-48129365531.asia-south1.run.app/",
 });
 //
 // ⚠️ When deploying frontend:
